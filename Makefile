@@ -1,34 +1,42 @@
-.PHONY: dev-local dev-lakebase dev-down dev-destroy dev-status lakebase-init refresh-token
+.PHONY: help dev-local dev-lakebase dev-down dev-destroy dev-status lakebase-init refresh-token
+
+.DEFAULT_GOAL := help
+
+help: ## Show this help
+	@printf '\nUsage: make <target>\n\n'
+	@grep -E '^[a-zA-Z_-]+:.*##' $(MAKEFILE_LIST) | \
+		awk -F ':.*## ' '{printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
+	@echo ''
 
 # ---------------------------------------------------------------------------
 # Local development (PostgreSQL container)
 # ---------------------------------------------------------------------------
 
-dev-local:
+dev-local: ## Start app with local PostgreSQL container
 	docker compose --profile local up --build
 
 # ---------------------------------------------------------------------------
 # Lakebase development (ephemeral branch from production)
 # ---------------------------------------------------------------------------
 
-lakebase-init:
+lakebase-init: ## Provision a new Lakebase database (first-time setup)
 	@./scripts/db_init.sh
 
-dev-lakebase:
+dev-lakebase: ## Start app with an ephemeral Lakebase branch
 	@./scripts/lakebase-branch.sh
 	docker compose --env-file .env.lakebase up --build
 
-refresh-token:
+refresh-token: ## Refresh the Lakebase OAuth token without restarting
 	@./scripts/lakebase-branch.sh --refresh-only
 
 # ---------------------------------------------------------------------------
 # Lifecycle
 # ---------------------------------------------------------------------------
 
-dev-down:
+dev-down: ## Stop containers (keeps volumes)
 	docker compose --profile local down
 
-dev-destroy:
+dev-destroy: ## Stop containers, delete Lakebase branch, remove .env.lakebase
 	@if [ -f .env.lakebase ]; then \
 		. ./lakebase.config; \
 		BRANCH_PATH=$$(grep '^LAKEBASE_BRANCH_PATH=' .env.lakebase | cut -d= -f2); \
@@ -46,7 +54,7 @@ dev-destroy:
 	fi
 	docker compose --profile local down
 
-dev-status:
+dev-status: ## Show current Lakebase branch info
 	@if [ -f .env.lakebase ]; then \
 		echo "=== .env.lakebase ==="; \
 		grep -v 'DATABASE_URL' .env.lakebase; \
