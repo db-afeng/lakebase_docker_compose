@@ -146,10 +146,10 @@ services:
 
 ```mermaid
 flowchart LR
-  subgraph local ["Local Mode: make dev-local"]
+  subgraph local ["Local Mode"]
     PG[PostgreSQL 17 Container]
   end
-  subgraph lakebase ["Lakebase Mode: make dev-lakebase"]
+  subgraph lakebase ["Lakebase Mode"]
     LB["Lakebase Branch"]
   end
   subgraph services [Always Running]
