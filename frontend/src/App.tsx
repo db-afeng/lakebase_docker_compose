@@ -231,10 +231,25 @@ export default function App() {
   };
 
   const handleToggle = async (id: string) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? { ...t, status: t.status === "completed" ? "pending" : "completed" }
+          : t
+      )
+    );
+
     try {
       const updated = await api.toggleTask(id);
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
     } catch {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === id
+            ? { ...t, status: t.status === "completed" ? "pending" : "completed" }
+            : t
+        )
+      );
       setError("Toggle failed");
     }
   };
