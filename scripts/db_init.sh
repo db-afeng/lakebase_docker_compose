@@ -75,10 +75,14 @@ check_requirements() {
 write_config() {
     local key="$1"
     local value="$2"
-    if [[ "$(uname)" == "Darwin" ]]; then
-        sed -i '' "s|^${key}=.*|${key}=${value}|" "$CONFIG_FILE"
+    if grep -q "^${key}=" "$CONFIG_FILE"; then
+        if [[ "$(uname)" == "Darwin" ]]; then
+            sed -i '' "s|^${key}=.*|${key}=${value}|" "$CONFIG_FILE"
+        else
+            sed -i "s|^${key}=.*|${key}=${value}|" "$CONFIG_FILE"
+        fi
     else
-        sed -i "s|^${key}=.*|${key}=${value}|" "$CONFIG_FILE"
+        echo "${key}=${value}" >> "$CONFIG_FILE"
     fi
 }
 

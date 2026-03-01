@@ -60,7 +60,7 @@ if [[ -z "${LAKEBASE_PROJECT_ID:-}" ]]; then
     exit 1
 fi
 
-PROJECT_PATH="projects/${LAKEBASE_PROJECT_ID}"
+PROJECT_PATH="projects/${LAKEBASE_PROJECT_NAME}"
 
 PROFILE_FLAG=""
 if [[ -n "${LAKEBASE_PROFILE:-}" && "$LAKEBASE_PROFILE" != "DEFAULT" ]]; then
@@ -99,7 +99,7 @@ get_branch_name() {
     echo -e "\n${YELLOW}Deriving branch name...${NC}"
 
     GIT_USER=$(git config user.name 2>/dev/null || echo "unknown")
-    GIT_USER=$(echo "$GIT_USER" | tr ' ' '_')
+    GIT_USER=$(echo "$GIT_USER" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]//g')
 
     GIT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
     if [[ -z "$GIT_BRANCH" ]]; then
