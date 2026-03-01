@@ -306,8 +306,8 @@ And unlike replicating a database on RDS or Azure where you're waiting on snapsh
 
 If Lakebase branching is interesting to you, there's a lot more to explore beyond what this post covers:
 
-- [Databricks Lakebase Documentation](https://docs.databricks.com/en/lakebase/index.html) — full feature overview, including managed endpoints, auto-scaling, and Unity Catalog integration
-- [Lakebase Branching Guide](https://docs.databricks.com/en/lakebase/branch.html) — deep dive into branch creation, TTLs, and copy-on-write semantics
-- [Databricks CLI Reference](https://docs.databricks.com/en/dev-tools/cli/postgres-commands.html) — all the `databricks postgres` commands used in this post
+- [Databricks Lakebase Documentation](https://docs.databricks.com/aws/en/oltp/projects/) — full feature overview, including managed endpoints, auto-scaling, and Unity Catalog integration
+- [Lakebase Branching Guide](https://docs.databricks.com/aws/en/oltp/projects/branches) — deep dive into branch creation, TTLs, and copy-on-write semantics
+- [Databricks CLI Reference](https://docs.databricks.com/aws/en/oltp/projects/manage) — all the `databricks postgres` commands used in this post
 
 The companion repo is available at [github.com/alexfeng-db/lakebase_docker_compose](https://github.com/alexfeng-db/lakebase_docker_compose). Clone it, swap in your own Databricks workspace, and try it against your own stack.
