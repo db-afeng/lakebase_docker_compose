@@ -59,6 +59,43 @@ header h1 {
   letter-spacing: 0.04em;
 }
 
+/* ── Connecting screen ────────────────────────────────────── */
+
+.connecting-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  text-align: center;
+}
+
+.connecting-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1.25rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.connecting-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+}
+
+.connecting-detail {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
 /* ── Error ────────────────────────────────────────────────── */
 
 .error-banner {

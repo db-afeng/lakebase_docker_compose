@@ -1,4 +1,6 @@
+import logging
 import os
+import time
 from datetime import datetime, timezone
 
 import redis
@@ -8,6 +10,11 @@ from flask_cors import CORS
 from models import Task, db
 from search import ensure_index, remove_task, search_tasks, sync_all_tasks, upsert_task
 
+logger = logging.getLogger(__name__)
+
+DB_CONNECT_MAX_RETRIES = int(os.environ.get("DB_CONNECT_RETRIES", "10"))
+DB_CONNECT_RETRY_DELAY = int(os.environ.get("DB_CONNECT_RETRY_DELAY", "3"))
+
 app = Flask(__name__)
 CORS(app)
 
@@ -15,15 +22,30 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", "postgresql://appuser:apppassword@localhost:5432/tododb"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_pre_ping": True,
+}
 
 db.init_app(app)
 cache = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379/0"))
 
 with app.app_context():
     ensure_index(cache)
-    tasks = Task.query.all()
-    if tasks:
-        sync_all_tasks(cache, tasks)
+    for _attempt in range(1, DB_CONNECT_MAX_RETRIES + 1):
+        try:
+            tasks = Task.query.all()
+            if tasks:
+                sync_all_tasks(cache, tasks)
+            break
+        except Exception:
+            if _attempt == DB_CONNECT_MAX_RETRIES:
+                logger.error("Failed to connect to database after %d attempts", DB_CONNECT_MAX_RETRIES)
+                raise
+            logger.warning(
+                "Database not ready (attempt %d/%d) — retrying in %ds...",
+                _attempt, DB_CONNECT_MAX_RETRIES, DB_CONNECT_RETRY_DELAY,
+            )
+            time.sleep(DB_CONNECT_RETRY_DELAY)
 
 
 # ---------------------------------------------------------------------------

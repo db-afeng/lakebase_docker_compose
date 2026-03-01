@@ -169,6 +169,27 @@ function TaskRow({
   );
 }
 
+const MAX_CONNECT_RETRIES = 20;
+const CONNECT_RETRY_DELAY_MS = 3000;
+
+function ConnectingScreen({ attempt }: { attempt: number }) {
+  return (
+    <div className="app">
+      <header>
+        <h1>To-Do List</h1>
+        <p className="subtitle">Lakebase Branching Demo</p>
+      </header>
+      <div className="connecting-screen">
+        <div className="connecting-spinner" />
+        <p className="connecting-title">Connecting to database&hellip;</p>
+        <p className="connecting-detail">
+          Waiting for Lakebase to start (attempt {attempt}/{MAX_CONNECT_RETRIES})
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [health, setHealth] = useState<HealthStatus | null>(null);
@@ -177,7 +198,10 @@ export default function App() {
   const [filter, setFilter] = useState<Filter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState("");
+  const [connecting, setConnecting] = useState(true);
+  const [connectAttempt, setConnectAttempt] = useState(1);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const cancelledRef = useRef(false);
 
   const loadTasks = useCallback(async () => {
     try {
@@ -191,10 +215,38 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    loadTasks();
-    api.fetchHealth().then(setHealth).catch(() => {});
-    api.fetchDbInfo().then(setDbInfo).catch(() => {});
-  }, [loadTasks]);
+    cancelledRef.current = false;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const tryConnect = async (attempt: number) => {
+      if (cancelledRef.current) return;
+      setConnectAttempt(attempt);
+      try {
+        const data = await api.fetchTasks();
+        if (cancelledRef.current) return;
+        setTasks(data.tasks);
+        setDataSource(data.source);
+        setError("");
+        setConnecting(false);
+        api.fetchHealth().then(setHealth).catch(() => {});
+        api.fetchDbInfo().then(setDbInfo).catch(() => {});
+      } catch {
+        if (cancelledRef.current) return;
+        if (attempt >= MAX_CONNECT_RETRIES) {
+          setError("Failed to connect to database after multiple attempts. Is the backend running?");
+          setConnecting(false);
+          return;
+        }
+        timeout = setTimeout(() => tryConnect(attempt + 1), CONNECT_RETRY_DELAY_MS);
+      }
+    };
+
+    tryConnect(1);
+    return () => {
+      cancelledRef.current = true;
+      clearTimeout(timeout);
+    };
+  }, []);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -282,6 +334,10 @@ export default function App() {
   });
 
   const pendingCount = tasks.filter((t) => t.status === "pending").length;
+
+  if (connecting) {
+    return <ConnectingScreen attempt={connectAttempt} />;
+  }
 
   return (
     <div className="app">

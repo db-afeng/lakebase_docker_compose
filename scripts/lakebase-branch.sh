@@ -169,13 +169,10 @@ ensure_endpoint() {
         ENDPOINT_COUNT=$(echo "$ENDPOINTS_JSON" | jq 'length')
 
         if [[ "$ENDPOINT_COUNT" -gt 0 ]]; then
-            STATE=$(echo "$ENDPOINTS_JSON" | jq -r '.[0].status.current_state // empty')
-            if [[ "$STATE" == "ACTIVE" ]]; then
-                ENDPOINT_NAME=$(echo "$ENDPOINTS_JSON" | jq -r '.[0].name')
-                ENDPOINT_HOST=$(echo "$ENDPOINTS_JSON" | jq -r '.[0].status.hosts.host')
-                echo -e "  ${GREEN}Endpoint ACTIVE: ${ENDPOINT_HOST}${NC}"
-                return
-            fi
+            ENDPOINT_NAME=$(echo "$ENDPOINTS_JSON" | jq -r '.[0].name')
+            ENDPOINT_HOST=$(echo "$ENDPOINTS_JSON" | jq -r '.[0].status.hosts.host')
+            echo -e "  ${GREEN}Endpoint ACTIVE: ${ENDPOINT_HOST}${NC}"
+            return
             echo -e "  Attempt ${ATTEMPT}/${MAX_ATTEMPTS} — state: ${STATE:-unknown}..."
         else
             # No endpoint yet — create one
