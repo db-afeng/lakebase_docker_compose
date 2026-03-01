@@ -146,21 +146,21 @@ services:
 
 ```mermaid
 flowchart LR
-  subgraph devLocal ["make dev-local (profile: local)"]
+  subgraph local ["Local Mode: make dev-local"]
     PG[PostgreSQL 17 Container]
   end
-  subgraph devLakebase ["make dev-lakebase"]
-    LB["Lakebase Branch\ndev-Alex_Feng-feat/hello"]
+  subgraph lakebase ["Lakebase Mode: make dev-lakebase"]
+    LB["Lakebase Branch"]
   end
-  subgraph alwaysOn [Always Running]
-    BE[Flask Backend]
+  subgraph services [Always Running]
     FE[React Frontend]
+    BE[Flask Backend]
     RD[Redis Stack]
   end
+  FE --> BE
+  BE --> RD
   BE -->|DATABASE_URL| PG
   BE -->|DATABASE_URL| LB
-  BE --> RD
-  FE --> BE
 ```
 
 When you run `make dev-local`, Docker Compose activates the `local` profile and the Postgres container starts alongside everything else. When you run `make dev-lakebase`, the profile isn't activated, the Postgres container stays off, and the backend picks up `DATABASE_URL` from `.env.lakebase` — which points to your Lakebase branch.
@@ -283,11 +283,11 @@ flowchart TD
     C --> D{App works locally?}
     D -- No --> B
     D -- Yes --> E["make dev-lakebase"]
-    E --> F["Migration runs against\ncopy of production data"]
+    E --> F["Migration runs against copy of prod"]
     F --> G{Migration succeeds?}
     G -- No --> H["Fix migration"]
     H --> C
-    G -- Yes --> I["Push + open PR\nwith high confidence"]
+    G -- Yes --> I["Push + open PR with confidence"]
     I --> J["make dev-destroy"]
 
     style A fill:#1b3a4b,color:#fff
