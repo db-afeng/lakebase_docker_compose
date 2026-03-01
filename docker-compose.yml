@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:17
+    profiles: ["local"]
     environment:
       POSTGRES_DB: tododb
       POSTGRES_USER: appuser
@@ -32,15 +33,16 @@ services:
     ports:
       - "5001:5001"
     environment:
-      DATABASE_URL: postgresql://appuser:apppassword@postgres:5432/tododb
+      DATABASE_URL: ${DATABASE_URL:-postgresql://appuser:apppassword@postgres:5432/tododb}
       REDIS_URL: redis://redis:6379/0
       FLASK_ENV: development
-      DB_SOURCE: local-postgres
+      DB_SOURCE: ${DB_SOURCE:-local-postgres}
     volumes:
       - ./backend:/app
     depends_on:
       postgres:
         condition: service_healthy
+        required: false
       redis:
         condition: service_healthy
 
