@@ -144,6 +144,25 @@ services:
         condition: service_healthy
 ```
 
+```mermaid
+flowchart LR
+  subgraph devLocal ["make dev-local (profile: local)"]
+    PG[PostgreSQL 17 Container]
+  end
+  subgraph devLakebase ["make dev-lakebase"]
+    LB["Lakebase Branch\ndev-Alex_Feng-feat/hello"]
+  end
+  subgraph alwaysOn [Always Running]
+    BE[Flask Backend]
+    FE[React Frontend]
+    RD[Redis Stack]
+  end
+  BE -->|DATABASE_URL| PG
+  BE -->|DATABASE_URL| LB
+  BE --> RD
+  FE --> BE
+```
+
 When you run `make dev-local`, Docker Compose activates the `local` profile and the Postgres container starts alongside everything else. When you run `make dev-lakebase`, the profile isn't activated, the Postgres container stays off, and the backend picks up `DATABASE_URL` from `.env.lakebase` — which points to your Lakebase branch.
 
 The `required: false` on the `depends_on` is what makes this work cleanly. Without it, Docker Compose would error out when the postgres service isn't in the active profile.
@@ -257,24 +276,24 @@ Two commands. Same application. Different database backends.
 
 Here's what a typical session looks like:
 
-```bash
-# Start working on a new feature
-git checkout -b feat/add-priority
+```mermaid
+flowchart TD
+    A["git checkout -b feat/add-priority"] --> B["Write code + migration"]
+    B --> C["make dev-local"]
+    C --> D{App works locally?}
+    D -- No --> B
+    D -- Yes --> E["make dev-lakebase"]
+    E --> F["Migration runs against\ncopy of production data"]
+    F --> G{Migration succeeds?}
+    G -- No --> H["Fix migration"]
+    H --> C
+    G -- Yes --> I["Push + open PR\nwith high confidence"]
+    I --> J["make dev-destroy"]
 
-# Write your migration
-docker compose exec backend alembic revision --autogenerate -m "add priority column"
-
-# Test locally first (fast, offline)
-make dev-local
-
-# Happy with the code? Test the migration against real production data.
-make dev-lakebase
-
-# The migration runs against a copy of prod. If it fails, you find out now.
-# If it succeeds, you have high confidence the production deploy will too.
-
-# Done for the day — clean up
-make dev-destroy
+    style A fill:#1b3a4b,color:#fff
+    style E fill:#2a6f3b,color:#fff
+    style I fill:#2a6f3b,color:#fff
+    style H fill:#8b3a3a,color:#fff
 ```
 
 ---
