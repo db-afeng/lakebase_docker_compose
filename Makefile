@@ -13,7 +13,7 @@ help: ## Show this help
 # ---------------------------------------------------------------------------
 
 dev-local: ## Start app with local PostgreSQL container
-	docker compose --profile local up --build
+	docker compose --profile local up --build -d
 
 # ---------------------------------------------------------------------------
 # Lakebase development (ephemeral branch from production)
@@ -24,7 +24,7 @@ lakebase-init: ## Provision a new Lakebase database (first-time setup)
 
 dev-lakebase: ## Start app with an ephemeral Lakebase branch
 	@./scripts/lakebase-branch.sh
-	docker compose --env-file .env.lakebase up --build
+	docker compose --env-file .env.lakebase up --build -d
 
 refresh-token: ## Refresh the Lakebase OAuth token without restarting
 	@./scripts/lakebase-branch.sh --refresh-only
