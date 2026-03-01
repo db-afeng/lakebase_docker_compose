@@ -1,4 +1,0 @@
-1) for the user name, i'd rather use git config user.name. replace any spaces with underscores. make sure the .env.lakebase is in the gitignore
-2) Check if the makefile lakebase and local dev do the same thing only difference it doenst spin up docer
-3) show the branch name of the source
-4) test the init and make docker lakebase
