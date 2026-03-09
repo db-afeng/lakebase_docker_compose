@@ -2,6 +2,8 @@
 
 A to-do list app demonstrating how Databricks Lakebase branching integrates with the local development workflow via Docker Compose.
 
+**Blog post:** [Lakebase Branching Meets Docker: The Migration Safety Net I Wish I Had Years Ago](https://community.databricks.com/t5/technical-blog/lakebase-branching-meets-docker-the-migration-safety-net-i-wish/ba-p/149945)
+
 ## Architecture
 
 | Service  | Tech                       | Port | Role                              |
