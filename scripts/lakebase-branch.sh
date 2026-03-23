@@ -102,6 +102,7 @@ get_branch_name() {
     GIT_USER=$(echo "$GIT_USER" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]//g')
 
     GIT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+    GIT_BRANCH=$(echo "$GIT_BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//')
     if [[ -z "$GIT_BRANCH" ]]; then
         echo -e "${RED}Not on a git branch (detached HEAD). Check out a branch first.${NC}"
         exit 1
